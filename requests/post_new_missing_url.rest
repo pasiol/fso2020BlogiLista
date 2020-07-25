@@ -1,0 +1,6 @@
+POST http://localhost:3001/api/blogs HTTP/1.1
+Content-Type: application/json
+
+{
+  "title": "JSON Web Token in a nutshell", "author": "Marc Backes", "likes": 0
+}

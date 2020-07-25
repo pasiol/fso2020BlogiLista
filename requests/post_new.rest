@@ -2,5 +2,5 @@ POST http://localhost:3001/api/blogs HTTP/1.1
 Content-Type: application/json
 
 {
-  "title": "JSON Web Token in a nutshell", "author": "Marc Backes", "url": "https://dev.to/themarcba/secure-your-node-js-application-with-json-web-token-4d4e", "likes": 0
+  "title": "Mouse vs Python", "author": "Mike", "url": "http://www.blog.pythonlibrary.org/", "likes": 0
 }

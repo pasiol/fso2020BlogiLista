@@ -1,0 +1,31 @@
+[
+  {
+      "title": "Let’s Code: Test-Driven JavaScript",
+      "author": "James Shore",
+      "url": "http://www.letscodejavascript.com/",
+      "likes": 0
+  },
+  {
+      "title": "Dev To",
+      "url": "https://dev.to",
+      "likes": 0
+  },
+  {
+      "title": "William Vincent, mainly Django",
+      "author": "William Vincent",
+      "url": "https://wsvincent.com/",
+      "likes": 0
+  },
+  {
+      "title": "teditor",
+      "author": "Tobias Nickel",
+      "url": "https://github.com/tobiasnickel/teditor",
+      "likes": 0
+  },
+  {
+      "title": "JSON Web Token in a nutshell",
+      "author": "Marc Backes",
+      "url": "https://dev.to/themarcba/secure-your-node-js-application-with-json-web-token-4d4e",
+      "likes": 0
+  }
+]
