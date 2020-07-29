@@ -1,16 +1,24 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const helper = require('./testHelper')
+const helperUser = require('./testHelperUser')
 const app = require('../app')
 const Blog = require('../models/blog')
-const { response } = require('../app')
-const { documentsInDb } = require('./testHelper')
+const User = require('../models/user')
 
 const api = supertest(app)
 
-beforeEach(async ()=> {
+beforeAll(async ()=> {
+  await User.deleteMany({})
+  const testUsers = await helperUser.getTestUsers()
+  await User.insertMany(testUsers)
+})
+
+beforeEach(async () => {
   await Blog.deleteMany({})
-  await Blog.insertMany(helper.testData)
+  const blogs = await helper.getTestBlogs()
+  await Blog.insertMany(blogs)
+  await helper.updateUsersWithBlogs()
 })
 
 describe('getting data', () => {
@@ -24,37 +32,42 @@ describe('getting data', () => {
 
   test('all blogs are returned', async () => {
     const response = await api.get('/api/blogs')
-    expect(response.body).toHaveLength(helper.testData.length)
+    const blogsInDB = await helper.getBlogsInDB()
+    expect(response.body.length).toBeGreaterThan(0)
+    expect(response.body).toHaveLength(blogsInDB.length)
   })
 
-  test('documents has id field', async () => {
+  test('blogs has id field', async () => {
     const response = await api.get('/api/blogs')
-    const document = response.body[0]
-    expect(document['id']).toBeDefined()
+    const blog = response.body[0]
+    expect(blog['id']).toBeDefined()
   })
 })
 
 describe('adding data', ()=> {
-  test('posting a new document', async () => {
-    const newBlog = new Blog(helper.testDocument)
-
+  test('posting a new valid document', async () => {
+    const newBlog = await helper.getTestBlog()
+    console.log('newBlog', newBlog)
     await api
       .post('/api/blogs')
       .send(newBlog)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const blogsAfterPost = await helper.documentsInDb()
-    expect(blogsAfterPost).toHaveLength(helper.testData.length + 1)
+    const blogsAfterPost = await helper.getBlogsInDB()
+    const testBlogs = await helper.getTestBlogs()
+    expect(blogsAfterPost).toHaveLength(testBlogs.length + 1)
     const titles = blogsAfterPost.map(b => b.title) 
-    expect(titles).toContain(helper.testDocument['title'])
+    expect(titles).toContain(newBlog['title'])
   })
 
   test('posting a new document without likes-property', async() => {
+    const testBlog = await helper.getTestBlog()
     var newBlog = new Blog({
-      title: helper.testDocument.title,
-      author: helper.testDocument.author,
-      url: helper.testDocument.url
+      title: testBlog.title,
+      author: testBlog.author,
+      url: testBlog.url,
+      user: testBlog.user
     })
     console.log('newBlog', newBlog)
     await api
@@ -63,7 +76,7 @@ describe('adding data', ()=> {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const blogsAfterPost = await helper.documentsInDb()
+    const blogsAfterPost = await helper.getBlogsInDB()
     const addedBlog = blogsAfterPost.filter(b => b.title === newBlog['title'])[0]
     console.log('addedBlog', addedBlog)
     expect(addedBlog['likes']).toBeDefined()
@@ -71,10 +84,11 @@ describe('adding data', ()=> {
   })
 
   test('posting a new document without title-property', async() => {
+    const testBlog = await helper.getTestBlog()
     var newBlog = new Blog({
-      author: helper.testDocument.author,
-      url: helper.testDocument.url,
-      likes: 0
+      author: testBlog.author,
+      url: testBlog.url,
+      user: testBlog.user
     })
     console.log('newBlog', newBlog)
     await api
@@ -84,10 +98,11 @@ describe('adding data', ()=> {
   })
 
   test('posting a new document without url-property', async() => {
+    const testBlog = await helper.getTestBlog()
     var newBlog = new Blog({
-      title: helper.testDocument.title,
-      author: helper.testDocument.author,
-      likes: 0
+      title: testBlog.title,
+      author: testBlog.author,
+      user: testBlog.user
     })
     console.log('newBlog', newBlog)
     await api
@@ -97,7 +112,7 @@ describe('adding data', ()=> {
   })
 
   test('updating likes property', async ()=> {
-    const blogs = await helper.documentsInDb()
+    const blogs = await helper.getBlogsInDB()
     const randomBlog = blogs[Math.floor((Math.random() * blogs.length))]
     randomBlog.likes = randomBlog.likes + 1
     console.log('randomBlog', randomBlog)
@@ -108,7 +123,7 @@ describe('adding data', ()=> {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const dataAfterUpdate = await helper.documentsInDb()
+    const dataAfterUpdate = await helper.getBlogsInDB()
     const updatedBlog = dataAfterUpdate.filter(b => b.id === randomBlog.id)[0]
     console.log('updatedBlog', updatedBlog)
     expect(updatedBlog.likes).toEqual(randomBlog.likes)
@@ -118,7 +133,7 @@ describe('adding data', ()=> {
 describe('deleting data', () => {
 
   test('deleting blog by id', async() => {
-    const blogs = await helper.documentsInDb()
+    const blogs = await helper.getBlogsInDB()
     const randomBlog = blogs[Math.floor((Math.random() * blogs.length))]
     console.log('randomBlog', randomBlog)
 
@@ -126,7 +141,7 @@ describe('deleting data', () => {
       .delete(`/api/blogs/${randomBlog.id}`)
       .expect(204)
 
-    const blogsAfterDelete = await helper.documentsInDb()
+    const blogsAfterDelete = await helper.getBlogsInDB()
 
     expect(blogsAfterDelete).toHaveLength(blogs.length - 1)
     

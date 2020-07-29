@@ -1,0 +1,14 @@
+[
+  {
+    "username": "teppo.testi@suomi.fi",
+    "name": "Teppo Testi",
+    "password": "salainen",
+    "blogs": null
+  },
+  {
+    "username": "teija.testi@suomi.fi",
+    "name": "Teija Testi",
+    "password": "tosiSalainen",
+    "blogs": null
+  }
+]

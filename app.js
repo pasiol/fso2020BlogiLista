@@ -9,6 +9,7 @@ const middleware = require('./utils/middleware')
 
 
 const blogsRouter = require('./controllers/blogs')
+const usersRouter = require('./controllers/users')
 const logger = require('./utils/logger')
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true})
@@ -26,5 +27,6 @@ app.set('json spaces', 4)
 app.use(express.static('build'))
 
 app.use('/api/blogs', blogsRouter)
+app.use('/api/users', usersRouter)
 
 module.exports = app

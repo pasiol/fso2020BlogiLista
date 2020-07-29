@@ -2,5 +2,9 @@ POST http://localhost:3001/api/blogs HTTP/1.1
 Content-Type: application/json
 
 {
-  "title": "Mouse vs Python", "author": "Mike", "url": "http://www.blog.pythonlibrary.org/", "likes": 0
+  "title": "Developing A RESTful API With Golang And A MongoDB NoSQL Database",
+  "author": "Nic Raboy",
+  "url": "https://www.thepolyglotdeveloper.com/2019/02/developing-restful-api-golang-mongodb-nosql-database/",
+  "likes": 0,
+  "userId": "5f1ef1eb5e51ea7c45e8b0fe"
 }

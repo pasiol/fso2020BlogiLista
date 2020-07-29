@@ -19,7 +19,8 @@ const blogSchema = mongoose.Schema({
     unique: true,
     uniqueCaseInsensitive: true
   },
-  likes: { type: Number, required: true }
+  likes: { type: Number, required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User'}
 })
 
 blogSchema.plugin(uniqueValidator)
