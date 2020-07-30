@@ -31,8 +31,8 @@ const updateUsersWithBlogs = async () => {
   const blogs =  await getBlogsInDB()
   for (let user of users) {
     console.log('user.id', user.id)
-    const usersBlogs = blogs.filter(b => toString(b.user) === toString(user.id))
-    const blogIds = usersBlogs.map(b => mongoose.Types.ObjectId(b.id))
+    const usersBlogs = blogs.filter(b => b.user.equals(user.id))
+    const blogIds = usersBlogs.map(b => b.id)
     console.log('usersBlogs', blogIds)
     user.blogs = blogIds
     await user.save()
