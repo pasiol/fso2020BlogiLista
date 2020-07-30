@@ -5,6 +5,7 @@ const helperUser = require('./testHelperUser')
 const app = require('../app')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const logger = require('../utils/logger')
 
 const api = supertest(app)
 
@@ -46,10 +47,14 @@ describe('getting data', () => {
 
 describe('adding data', ()=> {
   test('posting a new valid document', async () => {
-    const newBlog = await helper.getTestBlog()
+    const tokenAndUserId = await helper.getTokenAndUserId()
+    logger.info('tokenAndUserId', tokenAndUserId)
+    var newBlog = await helper.getTestBlog()
+    newBlog.user = tokenAndUserId.userId
     console.log('newBlog', newBlog)
     await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${tokenAndUserId.token}`)
       .send(newBlog)
       .expect(200)
       .expect('Content-Type', /application\/json/)
@@ -62,16 +67,18 @@ describe('adding data', ()=> {
   })
 
   test('posting a new document without likes-property', async() => {
+    const tokenAndUserId = await helper.getTokenAndUserId()
     const testBlog = await helper.getTestBlog()
     var newBlog = new Blog({
       title: testBlog.title,
       author: testBlog.author,
       url: testBlog.url,
-      user: testBlog.user
+      user: tokenAndUserId.userId
     })
     console.log('newBlog', newBlog)
     await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${tokenAndUserId.token}`)
       .send(newBlog)
       .expect(200)
       .expect('Content-Type', /application\/json/)
@@ -84,29 +91,33 @@ describe('adding data', ()=> {
   })
 
   test('posting a new document without title-property', async() => {
+    const tokenAndUserId = await helper.getTokenAndUserId()
     const testBlog = await helper.getTestBlog()
     var newBlog = new Blog({
       author: testBlog.author,
       url: testBlog.url,
-      user: testBlog.user
+      user: tokenAndUserId.userId
     })
     console.log('newBlog', newBlog)
     await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${tokenAndUserId.token}`)
       .send(newBlog)
       .expect(400)
   })
 
   test('posting a new document without url-property', async() => {
+    const tokenAndUserId = await helper.getTokenAndUserId()
     const testBlog = await helper.getTestBlog()
     var newBlog = new Blog({
       title: testBlog.title,
       author: testBlog.author,
-      user: testBlog.user
+      user: tokenAndUserId.userId
     })
     console.log('newBlog', newBlog)
     await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${tokenAndUserId.token}`)
       .send(newBlog)
       .expect(400)
   })
@@ -133,17 +144,28 @@ describe('adding data', ()=> {
 describe('deleting data', () => {
 
   test('deleting blog by id', async() => {
-    const blogs = await helper.getBlogsInDB()
-    const randomBlog = blogs[Math.floor((Math.random() * blogs.length))]
-    console.log('randomBlog', randomBlog)
+    const tokenAndUserId = await helper.getTokenAndUserId()
+    logger.info('tokenAndUserId', tokenAndUserId)
+    var newBlog = await helper.getTestBlog()
+    newBlog.user = tokenAndUserId.userId
+    console.log('newBlog', newBlog)
+    const response = await api
+      .post('/api/blogs')
+      .set('Authorization', `bearer ${tokenAndUserId.token}`)
+      .send(newBlog)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsCount = (await helper.getBlogsInDB()).length
 
     await api
-      .delete(`/api/blogs/${randomBlog.id}`)
+      .delete(`/api/blogs/${response.body.id}`)
+      .set('Authorization', `bearer ${tokenAndUserId.token}`)
       .expect(204)
 
     const blogsAfterDelete = await helper.getBlogsInDB()
 
-    expect(blogsAfterDelete).toHaveLength(blogs.length - 1)
+    expect(blogsAfterDelete).toHaveLength(blogsCount - 1)
     
   })
 })

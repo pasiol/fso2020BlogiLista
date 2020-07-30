@@ -1,11 +1,14 @@
+const app = require('../app')
 const Blog = require('../models/blog')
 const User = require('../models/user')
-const mongoose = require('mongoose')
+const supertest = require('supertest')
 const fs = require('fs')
+
+const api = supertest(app)
 
 const getUsersInDB = async () => {
   var users = []
-  users = await User.find({},{id: 1})
+  users = await User.find({})
   console.log('Getting users: ', users)
   return users
 }
@@ -42,11 +45,25 @@ const updateUsersWithBlogs = async () => {
 const getTestBlog = async () => {
   const testBlogRaw = await fs.readFileSync('./tests/testBlog.json')
   const  testBlog = await JSON.parse(testBlogRaw)
-  const users = await getUsersInDB()
-  const randomuser = users[Math.floor((Math.random() * users.length))].id
-  testBlog.user = randomuser
+  //const users = await getUsersInDB()
+  //const randomuser = users[Math.floor((Math.random() * users.length))].id
+  //testBlog.user = randomuser
+  testBlog.user = null
   console.log('newTestBlog', testBlog)
   return testBlog
+}
+
+const getTokenAndUserId = async() => {
+  const users = await getUsersInDB()
+  const randomUser = await users[Math.floor((Math.random() * users.length))]
+  const usernameAndPassword = {username: randomUser.username, password: process.env.TEST_USER_PASSWORD}
+  console.info('usernameAndPassword: ', usernameAndPassword)
+  const response = await api
+    .post('/api/login')
+    .send(usernameAndPassword)
+  console.info('login reponse: ', response.body)
+
+  return {token: response.body.token, userId: randomUser.id}
 }
 
 module.exports = {
@@ -54,5 +71,6 @@ module.exports = {
   getUsersInDB,
   getTestBlogs,
   getTestBlog,
-  updateUsersWithBlogs
+  updateUsersWithBlogs,
+  getTokenAndUserId
 }

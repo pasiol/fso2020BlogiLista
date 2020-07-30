@@ -8,7 +8,7 @@ const getTestUsers = async () => {
   const saltRounds = 10
   console.log(testUsers)
   for (let user of testUsers) {
-    const passwordHash = await bcrypt.hash(user.password, saltRounds)
+    const passwordHash = await bcrypt.hash(process.env.TEST_USER_PASSWORD, saltRounds)
     user.password = passwordHash
   }
   console.log('testUsers', testUsers)

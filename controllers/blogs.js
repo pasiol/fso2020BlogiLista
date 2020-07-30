@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken')
+const mongoose = require('mongoose')
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
@@ -10,6 +12,11 @@ blogsRouter.get('/', async (request, response) => {
 })
 
 blogsRouter.post('/', async (request, response) => {
+
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  if (!decodedToken || !decodedToken.id) {
+    return response.status(401).json({error: 'token missing or invalid'})
+  }
   var likes = 0
   if ('likes' in request.body) {
     likes = request.body.likes
@@ -25,9 +32,9 @@ blogsRouter.post('/', async (request, response) => {
     })
     console.log('POST blog:', blog)
     const savedBlog = await blog.save()
-    const user = await User.findById(blog.user)
+    const user = await User.findById(decodedToken.id)
     console.log('User:', user)
-    user.blogs = await user.blogs.concat(savedBlog.id)
+    user.blogs = await user.blogs.concat(decodedToken.id)
     console.log('user.blogs', user.blogs)
     await user.save()
     response.json(savedBlog.toJSON())  
@@ -38,9 +45,23 @@ blogsRouter.post('/', async (request, response) => {
 
 blogsRouter.delete('/:id', async (request, response) => {
   logger.info('DELETE request-body:', request.params)
-
-  await Blog.findByIdAndRemove(request.params.id)
-  response.status(204).end()
+  if (request.token !== null) {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    console.info('decodedToken:', decodedToken, decodedToken.id)
+    if (!decodedToken || !decodedToken.id) {
+      return response.status(401).json({error: 'token missing or invalid'})
+    }
+    const blog = await Blog.find({_id: mongoose.Types.ObjectId(request.params.id), user: decodedToken.id}, {id: 1})
+    console.info('blog', blog)
+    if (blog.length===1) {
+      await Blog.findByIdAndRemove(request.params.id)
+      response.status(204).end()
+    } else {
+      response.status(400).send()
+    }
+  } else {
+    return response.status(401).json({error: 'token missing or invalid'})
+  }
 })
 
 blogsRouter.put('/:id', async (request, response) => {

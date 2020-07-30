@@ -1,10 +1,11 @@
 POST http://localhost:3001/api/blogs HTTP/1.1
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlcHBvLnRlc3RpQHN1b21pLmZpIiwiaWQiOiI1ZjIyNzhkYjI1ZWVjODI2ZWRlMWY1NmEiLCJpYXQiOjE1OTYwOTQ3MjR9.rswvrpHkgVGXEgMofwEkB-_8t1q-1vZI-WuLUToJTc0
 
 {
   "title": "Developing A RESTful API With Golang And A MongoDB NoSQL Database",
   "author": "Nic Raboy",
   "url": "https://www.thepolyglotdeveloper.com/2019/02/developing-restful-api-golang-mongodb-nosql-database/",
   "likes": 0,
-  "userId": "5f1ef1eb5e51ea7c45e8b0fe"
+  "user": "5f2278db25eec826ede1f56a"
 }
