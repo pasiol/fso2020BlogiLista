@@ -29,7 +29,7 @@ usersRouter.post('/', async (request, response) => {
 usersRouter.get('/', async (request, response) => {
   var users = await User
     .find({},{password: 0})
-    .populate('blogs', { likes: 0})
+    .populate('blogs', { user:0, likes: 0})
   response.json(users.map(u => u.toJSON()))
 })
 
