@@ -7,7 +7,7 @@
     "start": "NODE_ENV=production node index.js",
     "dev": "NODE_ENV=test nodemon index.js",
     "lint": "eslint .",
-    "test": "NODE_ENV=test jest --verbose --detectOpenHandles --outputFile=./test.log"
+    "test": "NODE_ENV=test jest --verbose --detectOpenHandles --runInBand --outputFile=./test.log"
   },
   "repository": {
     "type": "git",
