@@ -22,13 +22,14 @@ blogsRouter.post('/', async (request, response) => {
     likes = request.body.likes
   }
 
-  if (('title' in request.body) && ('url' in request.body) && ('user' in request.body))  {
+  if (('title' in request.body) && ('url' in request.body))  {
     const blog = new Blog({
       title: request.body.title,
       author: request.body.author,
       url: request.body.url,
       likes: likes,
-      user: request.body.user
+      user: decodedToken.id
+      //user: request.body.user
     })
     console.log('POST blog:', blog)
     const savedBlog = await blog.save()
